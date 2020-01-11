@@ -1,0 +1,23 @@
+{
+  "name": "meetings",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon --experimental-modules --es-module-specifier-resolution=node ./bin/www",
+    "start": "node --experimental-modules --es-module-specifier-resolution=node ./bin/www"
+  },
+  "dependencies": {
+    "@google-cloud/firestore": "^3.3.2",
+    "@hapi/boom": "^9.0.0",
+    "cookie-parser": "~1.4.3",
+    "debug": "~2.6.9",
+    "dotenv": "^8.2.0",
+    "express": "~4.16.0",
+    "moment": "^2.24.0",
+    "morgan": "~1.9.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.2"
+  }
+}
