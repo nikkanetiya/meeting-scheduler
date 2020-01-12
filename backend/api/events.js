@@ -50,9 +50,13 @@ export const addAvailability = async (req, res, next) => {
     start = moment(start);
     end = moment(end);
 
+    if (!start.isAfter(moment())) {
+      return next(Boom.badRequest('Invalid start time'));
+    }
     if (!start.isBefore(end)) {
       return next(Boom.badRequest('Invalid start / end times'));
     }
+
     console.log(`[addAvailability] start    : ${start}`);
     console.log(`[addAvailability] end      : ${end}`);
     console.log(`[addAvailability] duration : ${duration}mins`);
@@ -61,7 +65,7 @@ export const addAvailability = async (req, res, next) => {
       _slot = moment(start);
 
     while (_slot.isBefore(end)) {
-      slots.push({ time: _slot.toDate(), available: true });
+      slots.push({ time: _slot.toDate(), duration, available: true });
       _slot.add(duration, 'minutes');
     }
     const result = await addSlots(slots);
