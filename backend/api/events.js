@@ -3,11 +3,16 @@ import moment from 'moment';
 import { jsonResponse } from '../libs/utils';
 import store from '../db/store';
 
-import { listEvents, addEvent, addSlots, listAvalilability } from '../services/event';
+import {
+  listEvents,
+  addEvent,
+  addSlots,
+  listAvalilability
+} from '../services/event';
 
 export const handleListEvents = async (req, res, next) => {
   try {
-    const list = await listEvents();
+    const list = await listEvents(req.query);
     res.send(jsonResponse(list));
   } catch (error) {
     console.log(error.stack);
