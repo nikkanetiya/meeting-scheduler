@@ -68,7 +68,7 @@ export const listAvalilability = async () => {
     .orderBy('time', 'asc')
     .get();
   snapshot.forEach(doc => {
-    result.push(doc.data());
+    result.push({ id: doc.id, ...doc.data() });
   });
   return result;
 };
