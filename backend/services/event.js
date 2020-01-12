@@ -55,8 +55,8 @@ export const addEvent = async data => {
   data.startTime = new Date(data.startTime);
   data.startTime.setSeconds(0);
 
-  data.endTime = new Date(data.startTime.getTime() + data.duration * 59 * 1000);
-  data.endTime.setSeconds(59);
+  data.endTime = new Date(data.startTime.getTime() + data.duration * 60 * 1000);
+  //data.endTime.setSeconds(59);
 
   const slotAvailable = await checkSlotAvailable(data.startTime);
   console.log('[addEvent] slotAvailable:', slotAvailable);
