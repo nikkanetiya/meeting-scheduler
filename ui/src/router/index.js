@@ -12,13 +12,13 @@ const routes = [
     component: Home
   },
   {
-    path: '/events',
-    name: 'events',
+    path: '/meetings',
+    name: 'meetings',
     component: Events
   },
   {
-    path: '/slots',
-    name: 'slots',
+    path: '/available-slots',
+    name: 'available-slots',
     component: Slots
   }
 ];
