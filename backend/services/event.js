@@ -1,4 +1,5 @@
 import db from '../db/store';
+import moment from 'moment';
 
 const checkSlotAvailable = async start => {
   const collection = db.collection('slots');
@@ -24,11 +25,34 @@ const markSlotNotAvailable = async (start, end) => {
   });
 };
 
-export const listEvents = async () => {
+export const listEvents = async queryArgs => {
+  let start, end;
+  console.log(queryArgs);
+  if (queryArgs.date) {
+    const date = queryArgs.date;
+    start = moment(date)
+      .startOf('day')
+      .toDate();
+    end = moment(date)
+      .endOf('day')
+      .toDate();
+
+    console.log(start, end);
+  }
+
   const collection = db.collection('events'),
     result = [];
 
-  const snapshot = await collection.orderBy('startTime', 'asc').get();
+  let snapshot;
+  if (start && end) {
+    snapshot = await collection
+      .where('startTime', '>', start)
+      .where('startTime', '<', end)
+      .orderBy('startTime', 'asc')
+      .get();
+  } else {
+    snapshot = await collection.orderBy('startTime', 'asc').get();
+  }
   snapshot.forEach(doc => {
     result.push({ id: doc.id, ...doc.data() });
   });
