@@ -1,5 +1,7 @@
 <template>
-  <div class="events">
+  <div class="meetings">
+    <a-date-picker @change="onChange" />
+    <a-divider />
     <a-list :grid="{ gutter: 16, column: 4 }" :dataSource="events">
       <a-list-item slot="renderItem" slot-scope="item">
         <a-card :title="item.date">{{ item.hours }}</a-card>
@@ -12,7 +14,7 @@
 import axios from 'axios';
 import moment from 'moment';
 export default {
-  name: 'events',
+  name: 'meetings',
   data() {
     return {
       loading: true,
@@ -21,36 +23,33 @@ export default {
   },
   created() {
     console.log('created');
-    this.getEvents();
   },
-  mounted() {},
   methods: {
-    getEvents: function() {
-      console.log(this.events);
-      if (!this.events.length) {
-        this.loading = true;
-        axios.get('http://localhost:3000/events').then(
-          response => {
-            console.log(response.data);
-            this.loading = false;
-            let { data } = response.data;
-            data = data.map(row => {
-              row.date = moment(row.startTime).format('D MMMM');
-              row.hours =
-                moment(row.startTime).format('h:mma') +
-                ' to ' +
-                moment(row.endTime).format('h:mma');
-              return row;
-            });
-            this.events = data;
-            console.log(this.events);
-          },
-          function(error) {
-            console.log('error:', error.stack);
-            this.loading = false;
-          }
-        );
-      }
+    onChange(date, dateString) {
+      console.log(date, dateString);
+      this.getEvents(dateString);
+    },
+    getEvents: function(date) {
+      this.loading = true;
+      axios.get('http://localhost:3000/events?date=' + date).then(
+        response => {
+          this.loading = false;
+          let { data } = response.data;
+          data = data.map(row => {
+            row.date = moment(row.startTime).format('D MMMM');
+            row.hours =
+              moment(row.startTime).format('h:mma') +
+              ' - ' +
+              moment(row.endTime).format('h:mma');
+            return row;
+          });
+          this.events = data;
+        },
+        function(error) {
+          console.log('error:', error.stack);
+          this.loading = false;
+        }
+      );
     }
   }
 };
