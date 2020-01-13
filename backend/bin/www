@@ -4,9 +4,9 @@
  * Module dependencies.
  */
 
-import app from '../app';
-import dbug from 'debug';
-import http from 'http';
+const app = require('../app');
+const dbug = require('debug');
+const http = require('http');
 
 const debug = dbug('meetings:server');
 /**

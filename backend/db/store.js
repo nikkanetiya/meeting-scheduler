@@ -1,5 +1,5 @@
-import { initEnv } from '../config';
+const initEnv = require('../config').initEnv;
 initEnv();
 
-import Firestore from '@google-cloud/firestore';
-export default new Firestore();
+const Firestore = require('@google-cloud/firestore');
+module.exports = new Firestore();

@@ -1,5 +1,5 @@
-import db from '../db/store';
-import moment from 'moment';
+const db = require('../db/store');
+const moment = require('moment');
 
 const checkSlotAvailable = async start => {
   const collection = db.collection('slots');
@@ -25,7 +25,7 @@ const markSlotNotAvailable = async (start, end) => {
   });
 };
 
-export const checkEventsBetweenInterval = async (start, end) => {
+const checkEventsBetweenInterval = async (start, end) => {
   const collection = db.collection('events');
   const snapshot = await collection
     .where('startTime', '>', start)
@@ -34,7 +34,7 @@ export const checkEventsBetweenInterval = async (start, end) => {
   return !snapshot.empty;
 };
 
-export const listEvents = async queryArgs => {
+const listEvents = async queryArgs => {
   let start, end;
   console.log(queryArgs);
   if (queryArgs.from && queryArgs.to) {
@@ -67,7 +67,7 @@ export const listEvents = async queryArgs => {
   return result;
 };
 
-export const listAvalilability = async () => {
+const listAvalilability = async () => {
   const collection = db.collection('slots'),
     result = [];
 
@@ -81,7 +81,7 @@ export const listAvalilability = async () => {
   return result;
 };
 
-export const addEvent = async data => {
+const addEvent = async data => {
   try {
     const collection = db.collection('events');
     console.log(data);
@@ -111,7 +111,7 @@ export const addEvent = async data => {
   }
 };
 
-export const addSlots = async data => {
+const addSlots = async data => {
   const collection = db.collection('slots');
   let writeBatch = db.batch();
   for (let i in data) {
@@ -120,4 +120,12 @@ export const addSlots = async data => {
   const writeResult = await writeBatch.commit();
 
   return writeResult;
+};
+
+module.exports = {
+  addSlots,
+  addEvent,
+  listAvalilability,
+  listEvents,
+  checkEventsBetweenInterval
 };

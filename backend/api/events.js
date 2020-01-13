@@ -1,17 +1,18 @@
-import Boom from '@hapi/boom';
-import moment from 'moment';
-import { jsonResponse } from '../libs/utils';
-import {
-  listEvents,
-  addEvent,
-  addSlots,
-  listAvalilability,
-  checkEventsBetweenInterval
-} from '../services/event';
+const Boom = require('@hapi/boom');
+const moment = require('moment');
+const jsonResponse = require('../libs/utils').jsonResponse;
 
-import { CreateEventSchema, AddAvailabilitySchema } from './schemas';
+const listEvents = require('../services/event').listEvents;
+const addEvent = require('../services/event').addEvent;
+const addSlots = require('../services/event').addSlots;
+const listAvalilability = require('../services/event').listAvalilability;
+const checkEventsBetweenInterval = require('../services/event')
+  .checkEventsBetweenInterval;
 
-export const handleListEvents = async (req, res, next) => {
+const CreateEventSchema = require('./schemas').CreateEventSchema;
+const AddAvailabilitySchema = require('./schemas').AddAvailabilitySchema;
+
+const handleListEvents = async (req, res, next) => {
   try {
     const list = await listEvents(req.query);
     res.send(jsonResponse(list));
@@ -21,7 +22,7 @@ export const handleListEvents = async (req, res, next) => {
   }
 };
 
-export const listAvailability = async (req, res, next) => {
+const listAvailability = async (req, res, next) => {
   try {
     const list = await listAvalilability();
     res.send(jsonResponse(list));
@@ -31,7 +32,7 @@ export const listAvailability = async (req, res, next) => {
   }
 };
 
-export const postEvent = async (req, res, next) => {
+const postEvent = async (req, res, next) => {
   try {
     const { error } = CreateEventSchema.validate(req.body);
     if (error) {
@@ -49,7 +50,7 @@ export const postEvent = async (req, res, next) => {
   }
 };
 
-export const addAvailability = async (req, res, next) => {
+const addAvailability = async (req, res, next) => {
   try {
     const { error } = AddAvailabilitySchema.validate(req.body);
     if (error) {
@@ -95,3 +96,11 @@ export const addAvailability = async (req, res, next) => {
     next(Boom.badImplementation());
   }
 };
+
+module.exports = {
+  handleListEvents,
+  listEvents,
+  postEvent,
+  listAvailability,
+  addAvailability
+}

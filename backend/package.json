@@ -2,7 +2,6 @@
   "name": "meetings",
   "version": "0.0.0",
   "private": true,
-  "type": "module",
   "scripts": {
     "dev": "nodemon --experimental-modules --es-module-specifier-resolution=node ./bin/www",
     "start": "node --experimental-modules --es-module-specifier-resolution=node ./bin/www"

@@ -1,9 +1,8 @@
-import express from 'express';
-import cors from 'cors';
-import cookieParser from 'cookie-parser';
-import logger from 'morgan';
-
-import indexRouter from './routes/index';
+const express = require('express');
+const cors = require('cors');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
+const indexRouter = require('./routes/index');
 
 const app = express();
 app.use(cors());
@@ -21,4 +20,4 @@ app.use((err, req, res, next) => {
   res.status(500).json({ statusCode: 500 });
 });
 
-export default app;
+module.exports = app;

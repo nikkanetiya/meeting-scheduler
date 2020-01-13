@@ -1,6 +1,6 @@
-import Firestore from '@google-cloud/firestore';
-import moment from 'moment';
-export const jsonResponse = (data, statusCode = 200, message = 'OK') => {
+const Firestore = require('@google-cloud/firestore');
+const moment = require('moment');
+const jsonResponse = (data, statusCode = 200, message = 'OK') => {
   return {
     statusCode,
     message,
@@ -23,4 +23,9 @@ const transform = data => {
     return data.map(row => transformObj(row));
   }
   return transformObj(data);
+};
+
+module.exports = {
+  jsonResponse,
+  transform
 };
