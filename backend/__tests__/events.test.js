@@ -1,7 +1,7 @@
 const moment = require('moment');
 const request = require('supertest');
 const app = require('../app');
-
+const db = require('../db/store');
 const slotsData = {
   start: moment()
     .add(1, 'hour')
@@ -37,7 +37,23 @@ const potentialInvalidEventSlot = {
   duration: 30
 };
 
-let addedEvent;
+beforeAll(() => {
+  db.collection('events')
+    .get()
+    .then(querySnapshot => {
+      querySnapshot.forEach(documentSnapshot => {
+        documentSnapshot.ref.delete().then(() => {});
+      });
+    });
+
+  db.collection('slots')
+    .get()
+    .then(querySnapshot => {
+      querySnapshot.forEach(documentSnapshot => {
+        documentSnapshot.ref.delete().then(() => {});
+      });
+    });
+});
 
 describe('Event Endpoints', () => {
   it('Should be able to add slots', async () => {
@@ -52,7 +68,6 @@ describe('Event Endpoints', () => {
       .post('/events')
       .send(validEventData);
     expect(res.statusCode).toEqual(200);
-    addedEvent = res.body.data;
   });
 
   it('Should not add event outside of added slot range', async () => {
