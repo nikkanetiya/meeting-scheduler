@@ -1,7 +1,10 @@
 <template>
   <div class="meetings">
     <!-- <a-date-picker @change="onChange" /> -->
-    <a-range-picker @change="onChange" />
+    <a-range-picker
+      :defaultValue="[startDate, endDate]"
+      @calendarChange="onChange"
+    />
     <a-divider />
     <a-list :grid="{ gutter: 16, column: 4 }" :dataSource="events">
       <a-list-item slot="renderItem" slot-scope="item">
@@ -18,6 +21,8 @@ export default {
   name: 'meetings',
   data() {
     return {
+      startDate: moment().startOf('day'),
+      endDate: moment().endOf('day'),
       loading: true,
       events: []
     };
@@ -25,14 +30,19 @@ export default {
   created() {
     console.log('created');
   },
+  mounted() {
+    this.getEvents();
+  },
   methods: {
-    onChange(date, dateRange) {
-      console.log(date, dateRange);
-      this.getEvents(dateRange);
+    onChange(dateRange) {
+      this.startDate = dateRange[0];
+      this.endDate = dateRange[1];
+      this.getEvents();
     },
-    getEvents: function(dateRange) {
+    getEvents: function() {
       this.loading = true;
-      const queryString = `from=${dateRange[0]}&to=${dateRange[1]}`;
+
+      const queryString = `from=${this.startDate}&to=${this.endDate}`;
       axios.get(`http://localhost:3000/events?${queryString}`).then(
         response => {
           this.loading = false;
