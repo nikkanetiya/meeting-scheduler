@@ -36,7 +36,7 @@ const checkEventsBetweenInterval = async (start, end) => {
 
 const listEvents = async queryArgs => {
   let start, end;
-  console.log(queryArgs);
+  // console.log(queryArgs);
   if (queryArgs.from && queryArgs.to) {
     start = moment(queryArgs.from)
       .startOf('day')
@@ -45,7 +45,7 @@ const listEvents = async queryArgs => {
       .endOf('day')
       .toDate();
 
-    console.log(start, end);
+    // console.log(start, end);
   }
 
   const collection = db.collection('events'),
@@ -84,7 +84,7 @@ const listAvalilability = async () => {
 const addEvent = async data => {
   try {
     const collection = db.collection('events');
-    console.log(data);
+    // console.log(data);
     data.startTime = new Date(data.startTime);
     data.startTime.setSeconds(0);
 
@@ -93,9 +93,9 @@ const addEvent = async data => {
     );
     //data.endTime.setSeconds(59);
 
-    console.log(data);
+    // console.log(data);
     const slotAvailable = await checkSlotAvailable(data.startTime);
-    console.log('[addEvent] slotAvailable:', slotAvailable);
+    // console.log('[addEvent] slotAvailable:', slotAvailable);
     if (!slotAvailable) {
       return new Error('This slot is not available');
     }
@@ -106,7 +106,7 @@ const addEvent = async data => {
     const docRef = await doc.get();
     return { id: docRef.id, ...docRef.data() };
   } catch (error) {
-    console.log(error.stack);
+    // console.log(error.stack);
     throw error;
   }
 };
