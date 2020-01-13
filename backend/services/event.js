@@ -73,25 +73,33 @@ export const listAvalilability = async () => {
 };
 
 export const addEvent = async data => {
-  const collection = db.collection('events');
+  try {
+    const collection = db.collection('events');
+    console.log(data);
+    data.startTime = new Date(data.startTime);
+    data.startTime.setSeconds(0);
 
-  data.startTime = new Date(data.startTime);
-  data.startTime.setSeconds(0);
+    data.endTime = new Date(
+      data.startTime.getTime() + data.duration * 60 * 1000
+    );
+    //data.endTime.setSeconds(59);
 
-  data.endTime = new Date(data.startTime.getTime() + data.duration * 60 * 1000);
-  //data.endTime.setSeconds(59);
+    console.log(data);
+    const slotAvailable = await checkSlotAvailable(data.startTime);
+    console.log('[addEvent] slotAvailable:', slotAvailable);
+    if (!slotAvailable) {
+      return new Error('This slot is not available');
+    }
 
-  const slotAvailable = await checkSlotAvailable(data.startTime);
-  console.log('[addEvent] slotAvailable:', slotAvailable);
-  if (!slotAvailable) {
-    return new Error('This slot is not available');
+    const doc = await collection.add(data);
+    await markSlotNotAvailable(data.startTime, data.endTime);
+
+    const docRef = await doc.get();
+    return { id: docRef.id, ...docRef.data() };
+  } catch (error) {
+    console.log(error.stack);
+    throw error;
   }
-
-  const doc = await collection.add(data);
-  await markSlotNotAvailable(data.startTime, data.endTime);
-
-  const docRef = await doc.get();
-  return { id: docRef.id, ...docRef.data() };
 };
 
 export const addSlots = async data => {
