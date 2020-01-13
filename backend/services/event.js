@@ -67,14 +67,37 @@ const listEvents = async queryArgs => {
   return result;
 };
 
-const listAvalilability = async () => {
+const listAvalilability = async queryArgs => {
   const collection = db.collection('slots'),
     result = [];
+  let start, end;
+  if (queryArgs.date) {
+    start = moment(queryArgs.date)
+      .startOf('day')
+      .toDate();
+    end = moment(queryArgs.date)
+      .endOf('day')
+      .toDate();
+  }
+  let snapshot;
+  if (start && end) {
+    snapshot = await collection
+      .where('available', '=', true)
+      .where('time', '>', start)
+      .where('time', '<', end)
+      .orderBy('time', 'asc')
+      .get();
+  } else {
+    snapshot = await collection
+      .where('available', '=', true)
+      .orderBy('time', 'asc')
+      .get();
+  }
 
-  const snapshot = await collection
-    .where('available', '=', true)
-    .orderBy('time', 'asc')
-    .get();
+  // const snapshot = await collection
+  //   .where('available', '=', true)
+  //   .orderBy('time', 'asc')
+  //   .get();
   snapshot.forEach(doc => {
     result.push({ id: doc.id, ...doc.data() });
   });

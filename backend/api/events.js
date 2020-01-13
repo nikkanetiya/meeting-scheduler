@@ -24,10 +24,10 @@ const handleListEvents = async (req, res, next) => {
 
 const listAvailability = async (req, res, next) => {
   try {
-    const list = await listAvalilability();
+    const list = await listAvalilability(req.query);
     res.send(jsonResponse(list));
   } catch (error) {
-    // console.log(error.stack);
+    console.log(error.stack);
     next(Boom.badImplementation());
   }
 };
@@ -59,8 +59,8 @@ const addAvailability = async (req, res, next) => {
 
     let { start, end, duration } = req.body;
 
-    start = moment(start);
-    end = moment(end);
+    start = moment(start).set({ second: 0 });
+    end = moment(end).set({ second: 0 });
 
     if (!start.isAfter(moment())) {
       return next(Boom.badRequest('Invalid start time'));
