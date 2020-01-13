@@ -1,6 +1,5 @@
 <template>
   <div class="meetings">
-    <!-- <a-date-picker @change="onChange" /> -->
     <a-range-picker
       :defaultValue="[startDate, endDate]"
       @calendarChange="onChange"

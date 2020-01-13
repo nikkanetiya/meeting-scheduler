@@ -40,9 +40,11 @@ export default {
     },
     getAvailability(date) {
       this.loading = true;
+      this.slots = [];
       axios.get('http://localhost:3000/events/availability?date=' + date).then(
         response => {
           this.loading = false;
+
           let { data } = response.data;
           data = data.map(row => {
             row.text = moment(row.time).format('h:mma');
@@ -58,15 +60,25 @@ export default {
       );
     },
     async addEvent(slot) {
-      const response = await axios.post('http://localhost:3000/events', {
-        startTime: slot.time,
-        duration: slot.duration
-      });
-      if (response && response.status === 200) {
-        this.$message.success('Meeting scheduled successfully');
-        this.removeSlot();
-      } else {
-        this.$message.error('Something went wrong!');
+      try {
+        const response = await axios.post('http://localhost:3000/events', {
+          startTime: slot.time,
+          duration: slot.duration
+        });
+        if (response && response.status === 200) {
+          this.$message.success('Meeting scheduled successfully');
+          this.removeSlot();
+        }
+      } catch (error) {
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.message
+        ) {
+          this.$message.error(error.response.data.message);
+        } else {
+          this.$message.error('Something went wrong!');
+        }
       }
     },
     removeSlot() {
