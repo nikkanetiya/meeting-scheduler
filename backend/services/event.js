@@ -25,6 +25,15 @@ const markSlotNotAvailable = async (start, end) => {
   });
 };
 
+export const checkEventsBetweenInterval = async (start, end) => {
+  const collection = db.collection('events');
+  const snapshot = await collection
+    .where('startTime', '>', start)
+    .where('startTime', '<', end)
+    .get();
+  return !snapshot.empty;
+};
+
 export const listEvents = async queryArgs => {
   let start, end;
   console.log(queryArgs);

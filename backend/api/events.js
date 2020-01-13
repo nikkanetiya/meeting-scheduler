@@ -1,13 +1,12 @@
 import Boom from '@hapi/boom';
 import moment from 'moment';
 import { jsonResponse } from '../libs/utils';
-import store from '../db/store';
-
 import {
   listEvents,
   addEvent,
   addSlots,
-  listAvalilability
+  listAvalilability,
+  checkEventsBetweenInterval
 } from '../services/event';
 
 export const handleListEvents = async (req, res, next) => {
@@ -57,6 +56,15 @@ export const addAvailability = async (req, res, next) => {
       return next(Boom.badRequest('Invalid start / end times'));
     }
 
+    const eventsAdded = await checkEventsBetweenInterval(
+      start.toDate(),
+      end.toDate()
+    );
+    console.log(`[addAvailability] eventsAdded    : ${eventsAdded}`);
+
+    if (eventsAdded) {
+      return next(Boom.badRequest('Events are already addded in this range'));
+    }
     console.log(`[addAvailability] start    : ${start}`);
     console.log(`[addAvailability] end      : ${end}`);
     console.log(`[addAvailability] duration : ${duration}mins`);
