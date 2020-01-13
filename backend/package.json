@@ -3,8 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "nodemon --experimental-modules --es-module-specifier-resolution=node ./bin/www",
-    "start": "node --experimental-modules --es-module-specifier-resolution=node ./bin/www"
+    "test": "jest",
+    "dev": "nodemon ./bin/www",
+    "start": "node ./bin/www"
   },
   "dependencies": {
     "@google-cloud/firestore": "^3.3.2",
@@ -19,6 +20,14 @@
     "morgan": "~1.9.0"
   },
   "devDependencies": {
-    "nodemon": "^2.0.2"
+    "jest": "^24.9.0",
+    "nodemon": "^2.0.2",
+    "supertest": "^4.0.2"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "coveragePathIgnorePatterns": [
+      "/node_modules/"
+    ]
   }
 }

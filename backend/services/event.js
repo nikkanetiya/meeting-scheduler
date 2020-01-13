@@ -84,18 +84,15 @@ const listAvalilability = async () => {
 const addEvent = async data => {
   try {
     const collection = db.collection('events');
-    // console.log(data);
+
     data.startTime = new Date(data.startTime);
     data.startTime.setSeconds(0);
 
     data.endTime = new Date(
       data.startTime.getTime() + data.duration * 60 * 1000
     );
-    //data.endTime.setSeconds(59);
 
-    // console.log(data);
     const slotAvailable = await checkSlotAvailable(data.startTime);
-    // console.log('[addEvent] slotAvailable:', slotAvailable);
     if (!slotAvailable) {
       return new Error('This slot is not available');
     }
