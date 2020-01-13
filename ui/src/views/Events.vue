@@ -1,6 +1,7 @@
 <template>
   <div class="meetings">
-    <a-date-picker @change="onChange" />
+    <!-- <a-date-picker @change="onChange" /> -->
+    <a-range-picker @change="onChange" />
     <a-divider />
     <a-list :grid="{ gutter: 16, column: 4 }" :dataSource="events">
       <a-list-item slot="renderItem" slot-scope="item">
@@ -25,13 +26,14 @@ export default {
     console.log('created');
   },
   methods: {
-    onChange(date, dateString) {
-      console.log(date, dateString);
-      this.getEvents(dateString);
+    onChange(date, dateRange) {
+      console.log(date, dateRange);
+      this.getEvents(dateRange);
     },
-    getEvents: function(date) {
+    getEvents: function(dateRange) {
       this.loading = true;
-      axios.get('http://localhost:3000/events?date=' + date).then(
+      const queryString = `from=${dateRange[0]}&to=${dateRange[1]}`;
+      axios.get(`http://localhost:3000/events?${queryString}`).then(
         response => {
           this.loading = false;
           let { data } = response.data;
