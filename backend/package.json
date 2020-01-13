@@ -10,6 +10,7 @@
   "dependencies": {
     "@google-cloud/firestore": "^3.3.2",
     "@hapi/boom": "^9.0.0",
+    "@hapi/joi": "^17.0.2",
     "cookie-parser": "~1.4.3",
     "cors": "^2.8.5",
     "debug": "~2.6.9",
