@@ -28,12 +28,11 @@ const markSlotNotAvailable = async (start, end) => {
 export const listEvents = async queryArgs => {
   let start, end;
   console.log(queryArgs);
-  if (queryArgs.date) {
-    const date = queryArgs.date;
-    start = moment(date)
+  if (queryArgs.from && queryArgs.to) {
+    start = moment(queryArgs.from)
       .startOf('day')
       .toDate();
-    end = moment(date)
+    end = moment(queryArgs.to)
       .endOf('day')
       .toDate();
 
