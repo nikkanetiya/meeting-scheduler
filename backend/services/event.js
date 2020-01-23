@@ -1,5 +1,11 @@
 const db = require('../db/store');
 const moment = require('moment');
+const { getMinutesArray, toChunks } = require('../libs/utils');
+
+const getMinutesFromMidnight = time => {
+  midnight = time.startOf('day');
+  return time.diff(midnight, 'minutes');
+};
 
 const checkSlotAvailable = async start => {
   const collection = db.collection('slots');
@@ -94,39 +100,49 @@ const listAvalilability = async queryArgs => {
       .get();
   }
 
-  // const snapshot = await collection
-  //   .where('available', '=', true)
-  //   .orderBy('time', 'asc')
-  //   .get();
   snapshot.forEach(doc => {
     result.push({ id: doc.id, ...doc.data() });
   });
   return result;
 };
 
+const checkEventExists = async (start, end) => {
+  start = new Date(start);
+  end = new Date(end);
+  //console.log(start, end);
+  const startMinutesSinceMidnight = start.getHours() * 60 + start.getMinutes();
+  const endMinutesSinceMidnight = end.getHours() * 60 + end.getMinutes();
+
+  const minuteChunks = toChunks(
+    getMinutesArray(startMinutesSinceMidnight, endMinutesSinceMidnight)
+  );
+  //console.log(JSON.stringify(minuteChunks));
+  const collection = db.collection('events');
+
+  for (let i = 0, len = minuteChunks.length; i < len; i++) {
+    let snapshot1 = await collection
+      .where('minutes', 'array-contains-any', minuteChunks[i])
+      .get();
+    //console.log(snapshot1.empty === false, minuteChunks[i]);
+    if (snapshot1.empty === false) return true;
+  }
+  return false;
+};
+
 const addEvent = async data => {
   try {
     const collection = db.collection('events');
 
-    data.startTime = new Date(data.startTime);
-    data.startTime.setSeconds(0);
-
-    data.endTime = new Date(
-      data.startTime.getTime() + data.duration * 60 * 1000
-    );
-
-    const slotAvailable = await checkSlotAvailable(data.startTime);
-    if (!slotAvailable) {
+    const eventExists = await checkEventExists(data.startTime, data.endTime);
+    if (eventExists) {
       return new Error('This slot is not available');
     }
 
     const doc = await collection.add(data);
-    await markSlotNotAvailable(data.startTime, data.endTime);
-
     const docRef = await doc.get();
     return { id: docRef.id, ...docRef.data() };
   } catch (error) {
-    // console.log(error.stack);
+    console.log(error.stack);
     throw error;
   }
 };
@@ -145,6 +161,7 @@ const addSlots = async data => {
 module.exports = {
   addSlots,
   addEvent,
+  checkEventExists,
   listAvalilability,
   listEvents,
   checkEventsBetweenInterval

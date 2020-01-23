@@ -1,6 +1,6 @@
 const Boom = require('@hapi/boom');
 const moment = require('moment');
-const { jsonResponse } = require('../libs/utils');
+const { jsonResponse, createEventPayload } = require('../libs/utils');
 
 const {
   addSlots,
@@ -38,14 +38,25 @@ const postEvent = async (req, res, next) => {
     if (error) {
       return next(Boom.badRequest(error.message));
     }
+    const data = req.body;
 
-    const result = await addEvent(req.body);
+    const event = createEventPayload(data);
+
+    // Slot must be between 8AM to 5PM (Fixed for test purposes)
+    if (
+      event.minutes[0] < 480 ||
+      event.minutes[event.minutes.length - 1] > 1020
+    ) {
+      return next(Boom.badRequest('Please select time between 8AM to 5PM'));
+    }
+
+    const result = await addEvent(event);
     if (result instanceof Error) {
       return next(Boom.badData(result.message));
     }
     res.send(jsonResponse(result));
   } catch (error) {
-    // console.log(error.stack);
+    console.log(error.stack);
     next(Boom.badImplementation());
   }
 };
