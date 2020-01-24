@@ -3,8 +3,7 @@
     <div id="nav">
       <router-link to="/">Home</router-link>&nbsp;|
       <router-link to="/meetings">Meetings</router-link>&nbsp;|
-      <router-link to="/available-slots">Availability</router-link>&nbsp;|
-      <router-link to="/add-slots">Add Availability</router-link>
+      <router-link to="/available-slots">Availability</router-link>
     </div>
     <router-view />
   </div>
@@ -12,7 +11,7 @@
 
 <style>
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  font-family: "Avenir", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;

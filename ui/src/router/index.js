@@ -3,7 +3,6 @@ import VueRouter from 'vue-router';
 import Home from '../views/Home.vue';
 import Events from '../views/Events.vue';
 import Slots from '../views/Slots.vue';
-import AddSlots from '../views/AddSlots.vue';
 Vue.use(VueRouter);
 
 const routes = [
@@ -21,11 +20,6 @@ const routes = [
     path: '/available-slots',
     name: 'available-slots',
     component: Slots
-  },
-  {
-    path: '/add-slots',
-    name: 'add-slots',
-    component: AddSlots
   }
 ];
 

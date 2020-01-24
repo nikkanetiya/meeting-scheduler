@@ -1,9 +1,6 @@
 <template>
   <div class="meetings">
-    <a-range-picker
-      :defaultValue="[startDate, endDate]"
-      @calendarChange="onChange"
-    />
+    <a-range-picker :defaultValue="[startDate, endDate]" @calendarChange="onChange" />
     <a-divider />
     <a-list :grid="{ gutter: 16, column: 4 }" :dataSource="events">
       <a-list-item slot="renderItem" slot-scope="item">
@@ -14,20 +11,17 @@
 </template>
 <script>
 /* eslint-disable no-console */
-import axios from 'axios';
-import moment from 'moment';
+import axios from "axios";
+import moment from "moment";
 export default {
-  name: 'meetings',
+  name: "meetings",
   data() {
     return {
-      startDate: moment().startOf('day'),
-      endDate: moment().endOf('day'),
+      startDate: moment().startOf("day"),
+      endDate: moment().endOf("day"),
       loading: true,
       events: []
     };
-  },
-  created() {
-    console.log('created');
   },
   mounted() {
     this.getEvents();
@@ -40,24 +34,28 @@ export default {
     },
     getEvents: function() {
       this.loading = true;
-
-      const queryString = `from=${this.startDate}&to=${this.endDate}`;
+      if (!this.startDate || !this.endDate) {
+        return false;
+      }
+      const queryString = `from=${this.startDate.format(
+        "YYYY-MM-DD"
+      )}&to=${this.endDate.format("YYYY-MM-DD")}`;
       axios.get(`http://localhost:3000/events?${queryString}`).then(
         response => {
           this.loading = false;
           let { data } = response.data;
           data = data.map(row => {
-            row.date = moment(row.startTime).format('D MMMM');
+            row.date = moment(row.startTime).format("D MMMM");
             row.hours =
-              moment(row.startTime).format('h:mma') +
-              ' - ' +
-              moment(row.endTime).format('h:mma');
+              moment(row.startTime).format("h:mma") +
+              " - " +
+              moment(row.endTime).format("h:mma");
             return row;
           });
           this.events = data;
         },
         function(error) {
-          console.log('error:', error.stack);
+          console.log("error:", error.stack);
           this.loading = false;
         }
       );

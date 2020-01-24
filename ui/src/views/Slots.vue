@@ -1,6 +1,6 @@
 <template>
   <div class="available-slots">
-    <a-date-picker @change="onChange" />
+    <a-date-picker @change="onChange" :defaultValue="selectedDate" />
     <a-divider />
     <a-list :grid="{ gutter: 16, column: 4 }" :dataSource="slots">
       <a-list-item slot="renderItem" slot-scope="item, index">
@@ -18,16 +18,20 @@
 </template>
 <script>
 /* eslint-disable no-console */
-import axios from 'axios';
-import moment from 'moment';
+import axios from "axios";
+import moment from "moment";
 export default {
-  name: 'available-slots',
+  name: "available-slots",
   data() {
     return {
+      selectedDate: moment(),
       loading: true,
       selectedSlotIndex: null,
       slots: []
     };
+  },
+  mounted() {
+    this.getAvailability();
   },
   methods: {
     confirmMeeting(index, slot) {
@@ -36,37 +40,40 @@ export default {
     },
     onChange(date, dateString) {
       console.log(date, dateString);
-      this.getAvailability(dateString);
+      this.selectedDate = date;
+      this.getAvailability();
     },
-    getAvailability(date) {
+    getAvailability() {
       this.loading = true;
       this.slots = [];
-      axios.get('http://localhost:3000/events/availability?date=' + date).then(
+      const date = this.selectedDate.format("YYYY-MM-DD");
+
+      axios.get("http://localhost:3000/events/availability?date=" + date).then(
         response => {
           this.loading = false;
 
           let { data } = response.data;
           data = data.map(row => {
-            row.text = moment(row.time).format('h:mma');
+            row.text = moment(row[0]).format("h:mma");
             return row;
           });
-          console.log(data);
+
           this.slots = data;
         },
         function(error) {
-          console.log('error:', error.stack);
+          console.log("error:", error.stack);
           this.loading = false;
         }
       );
     },
     async addEvent(slot) {
       try {
-        const response = await axios.post('http://localhost:3000/events', {
+        const response = await axios.post("http://localhost:3000/events", {
           startTime: slot.time,
           duration: slot.duration
         });
         if (response && response.status === 200) {
-          this.$message.success('Meeting scheduled successfully');
+          this.$message.success("Meeting scheduled successfully");
           this.removeSlot();
         }
       } catch (error) {
@@ -77,7 +84,7 @@ export default {
         ) {
           this.$message.error(error.response.data.message);
         } else {
-          this.$message.error('Something went wrong!');
+          this.$message.error("Something went wrong!");
         }
       }
     },
