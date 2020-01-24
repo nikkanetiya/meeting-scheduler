@@ -1,16 +1,10 @@
 const express = require('express');
 const router = express.Router();
 
-const {
-  postEvent,
-  addAvailability,
-  listAvailability,
-  handleListEvents
-} = require('../api/events');
+const { postEvent, listAvailability, getEvents } = require('../api/events');
 
-router.get('/', handleListEvents);
+router.get('/', getEvents);
 router.post('/', postEvent);
-router.post('/availability', addAvailability);
 router.get('/availability', listAvailability);
 
 module.exports = router;

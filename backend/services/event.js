@@ -7,47 +7,11 @@ const {
 } = require('../libs/utils');
 const globals = require('../config/globals');
 
-const getMinutesFromMidnight = time => {
-  midnight = time.startOf('day');
-  return time.diff(midnight, 'minutes');
-};
 
 const minutesSinceMidnight = date => {
   return date.getHours() * 60 + date.getMinutes();
 };
 
-const checkSlotAvailable = async start => {
-  const collection = db.collection('slots');
-  const snapshot = await collection
-    .where('time', '=', start)
-    .where('available', '=', true)
-    .get();
-
-  return !snapshot.empty;
-};
-
-const markSlotNotAvailable = async (start, end) => {
-  const collection = db.collection('slots');
-  const snapshot = await collection
-    .where('time', '>=', start)
-    .where('time', '<', end)
-    .where('available', '=', true)
-    .get();
-
-  snapshot.forEach(async doc => {
-    const docRef = db.doc('slots/' + doc.id);
-    await docRef.set({ available: false }, { merge: true });
-  });
-};
-
-const checkEventsBetweenInterval = async (start, end) => {
-  const collection = db.collection('events');
-  const snapshot = await collection
-    .where('startTime', '>', start)
-    .where('startTime', '<', end)
-    .get();
-  return !snapshot.empty;
-};
 
 const listEvents = async queryArgs => {
   let start, end;
@@ -182,10 +146,8 @@ const addSlots = async data => {
 //   console.log(r);
 // })();
 module.exports = {
-  addSlots,
   addEvent,
   checkEventExists,
   listAvailableSlots,
   listEvents,
-  checkEventsBetweenInterval
 };

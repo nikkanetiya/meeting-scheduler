@@ -6,11 +6,3 @@ module.exports.CreateEventSchema = Joi.object().keys({
     .max(60)
     .required()
 });
-
-module.exports.AddAvailabilitySchema = Joi.object().keys({
-  start: Joi.date().required(),
-  end: Joi.date().required(),
-  duration: Joi.number()
-    .max(60)
-    .required()
-});
