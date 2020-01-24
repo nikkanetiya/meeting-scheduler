@@ -1,10 +1,19 @@
 const db = require('../db/store');
 const moment = require('moment');
-const { getMinutesArray, toChunks } = require('../libs/utils');
+const {
+  getMinutesArray,
+  toChunks,
+  checkArrayCollides
+} = require('../libs/utils');
+const globals = require('../config/globals');
 
 const getMinutesFromMidnight = time => {
   midnight = time.startOf('day');
   return time.diff(midnight, 'minutes');
+};
+
+const minutesSinceMidnight = date => {
+  return date.getHours() * 60 + date.getMinutes();
 };
 
 const checkSlotAvailable = async start => {
@@ -68,62 +77,71 @@ const listEvents = async queryArgs => {
     snapshot = await collection.orderBy('startTime', 'asc').get();
   }
   snapshot.forEach(doc => {
-    result.push({ id: doc.id, ...doc.data() });
+    let { startTime, endTime } = doc.data();
+    result.push({ id: doc.id, startTime, endTime });
   });
   return result;
 };
 
-const listAvalilability = async queryArgs => {
-  const collection = db.collection('slots'),
-    result = [];
-  let start, end;
-  if (queryArgs.date) {
-    start = moment(queryArgs.date)
-      .startOf('day')
-      .toDate();
-    end = moment(queryArgs.date)
-      .endOf('day')
-      .toDate();
-  }
-  let snapshot;
-  if (start && end) {
-    snapshot = await collection
-      .where('available', '=', true)
-      .where('time', '>', start)
-      .where('time', '<', end)
-      .orderBy('time', 'asc')
-      .get();
-  } else {
-    snapshot = await collection
-      .where('available', '=', true)
-      .orderBy('time', 'asc')
-      .get();
-  }
+const listAvailableSlots = async date => {
+  const collection = db.collection('events');
+
+  let start,
+    end,
+    allMinutes = [];
+  start = moment(date).startOf('day');
+  end = moment(date).endOf('day');
+
+  let snapshot = await collection
+    .where('startTime', '>', start.toDate())
+    .where('startTime', '<', end.toDate())
+    .orderBy('startTime', 'asc')
+    .get();
 
   snapshot.forEach(doc => {
-    result.push({ id: doc.id, ...doc.data() });
+    const { minutes } = doc.data();
+    allMinutes = allMinutes.concat(minutes);
   });
-  return result;
+
+  let now = moment(date).add(globals.startMinutes, 'minutes');
+  let endOfWorkDay = moment(date).add(globals.endMinutes, 'minutes');
+  let slots = [];
+
+  while (now.isBefore(endOfWorkDay)) {
+    const _start = now.clone();
+
+    now.add(globals.duration, 'minutes').subtract(1, 'milliseconds');
+    const _minutes = getMinutesArray(
+      minutesSinceMidnight(_start.toDate()),
+      minutesSinceMidnight(now.toDate())
+    );
+    const arrayCollide = checkArrayCollides(allMinutes, _minutes);
+    now.add(1, 'milliseconds');
+
+    if (!arrayCollide) {
+      slots.push([_start.format(), now.format()]);
+    }
+  }
+  return slots;
 };
 
 const checkEventExists = async (start, end) => {
   start = new Date(start);
   end = new Date(end);
-  //console.log(start, end);
+
   const startMinutesSinceMidnight = start.getHours() * 60 + start.getMinutes();
   const endMinutesSinceMidnight = end.getHours() * 60 + end.getMinutes();
 
   const minuteChunks = toChunks(
     getMinutesArray(startMinutesSinceMidnight, endMinutesSinceMidnight)
   );
-  //console.log(JSON.stringify(minuteChunks));
-  const collection = db.collection('events');
 
+  const collection = db.collection('events');
   for (let i = 0, len = minuteChunks.length; i < len; i++) {
     let snapshot1 = await collection
       .where('minutes', 'array-contains-any', minuteChunks[i])
       .get();
-    //console.log(snapshot1.empty === false, minuteChunks[i]);
+
     if (snapshot1.empty === false) return true;
   }
   return false;
@@ -140,9 +158,10 @@ const addEvent = async data => {
 
     const doc = await collection.add(data);
     const docRef = await doc.get();
-    return { id: docRef.id, ...docRef.data() };
+    const { startTime, endTime } = docRef.data();
+    return { id: docRef.id, startTime, endTime };
   } catch (error) {
-    console.log(error.stack);
+    console.log(error);
     throw error;
   }
 };
@@ -158,11 +177,15 @@ const addSlots = async data => {
   return writeResult;
 };
 
+// (async () => {
+//   let r = await listAvalilability('2020-01-22');
+//   console.log(r);
+// })();
 module.exports = {
   addSlots,
   addEvent,
   checkEventExists,
-  listAvalilability,
+  listAvailableSlots,
   listEvents,
   checkEventsBetweenInterval
 };
