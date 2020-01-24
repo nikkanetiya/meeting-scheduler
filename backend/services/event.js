@@ -7,11 +7,9 @@ const {
 } = require('../libs/utils');
 const globals = require('../config/globals');
 
-
 const minutesSinceMidnight = date => {
   return date.getHours() * 60 + date.getMinutes();
 };
-
 
 const listEvents = async queryArgs => {
   let start, end;
@@ -42,6 +40,9 @@ const listEvents = async queryArgs => {
   }
   snapshot.forEach(doc => {
     let { startTime, endTime } = doc.data();
+
+    // To display whole hour with 00 seconds instead of 59 seconds on client
+    endTime['_seconds'] += 1;
     result.push({ id: doc.id, startTime, endTime });
   });
   return result;
@@ -92,7 +93,7 @@ const listAvailableSlots = async date => {
 const checkEventExists = async (start, end) => {
   start = new Date(start);
   end = new Date(end);
-
+  //console.log(start, end);
   const startMinutesSinceMidnight = start.getHours() * 60 + start.getMinutes();
   const endMinutesSinceMidnight = end.getHours() * 60 + end.getMinutes();
 
@@ -101,8 +102,17 @@ const checkEventExists = async (start, end) => {
   );
 
   const collection = db.collection('events');
+  const dayStart = moment(start)
+    .startOf('day')
+    .toDate();
+  const dayEnd = moment(start)
+    .endOf('day')
+    .toDate();
+
   for (let i = 0, len = minuteChunks.length; i < len; i++) {
     let snapshot1 = await collection
+      .where('startTime', '>', dayStart)
+      .where('startTime', '<', dayEnd)
       .where('minutes', 'array-contains-any', minuteChunks[i])
       .get();
 
@@ -149,5 +159,5 @@ module.exports = {
   addEvent,
   checkEventExists,
   listAvailableSlots,
-  listEvents,
+  listEvents
 };
