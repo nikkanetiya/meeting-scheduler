@@ -9,19 +9,16 @@ const jsonResponse = (data, statusCode = 200, message = 'OK') => {
 };
 
 const transformObj = obj => {
+  // Dirty hack to bypass transformation in case of listAvalibility api
+  if (!isNaN(obj)) return obj;
+
+  // Convert Firestore timestamps to JS date strings
   if (obj.startTime && obj.startTime instanceof Firestore.Timestamp)
     obj.startTime = moment(new Date(obj.startTime._seconds * 1000)).format();
   if (obj.endTime && obj.endTime instanceof Firestore.Timestamp)
     obj.endTime = moment(new Date(obj.endTime._seconds * 1000)).format();
 
-  // return new object to ensure key ordering
-  return {
-    id: obj.id,
-    startTime: obj.startTime,
-    endTime: obj.endTime,
-    duration: obj.duration,
-    minutes: obj.minutes
-  };
+  return obj;
 };
 
 const transform = data => {
@@ -53,7 +50,6 @@ const createEventPayload = data => {
   startTime.setSeconds(0);
   const endTime = new Date(startTime.getTime() + data.duration * 60 * 1000 - 1);
 
-  delete data.duration;
   const startMinutesSinceMidnight =
     startTime.getHours() * 60 + startTime.getMinutes();
   const endMinutesSinceMidnight =
@@ -64,10 +60,17 @@ const createEventPayload = data => {
   return { startTime, endTime, minutes };
 };
 
+const checkArrayCollides = (big, small) => {
+  return small.some(function(v) {
+    return big.indexOf(v) >= 0;
+  });
+};
+
 module.exports = {
   jsonResponse,
   transform,
   getMinutesArray,
   toChunks,
+  checkArrayCollides,
   createEventPayload
 };
