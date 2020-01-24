@@ -1,12 +1,13 @@
 const Boom = require('@hapi/boom');
 const moment = require('moment');
 const { jsonResponse, createEventPayload } = require('../libs/utils');
+const globals = require('../config/globals');
 
 const {
   addSlots,
   addEvent,
   listEvents,
-  listAvalilability,
+  listAvailableSlots,
   checkEventsBetweenInterval
 } = require('../services/event');
 
@@ -24,7 +25,12 @@ const handleListEvents = async (req, res, next) => {
 
 const listAvailability = async (req, res, next) => {
   try {
-    const list = await listAvalilability(req.query);
+    let { date } = req.query;
+
+    if (!moment(date).isValid()) {
+      return next(Boom.badRequest('Invalid date'));
+    }
+    const list = await listAvailableSlots(date);
     res.send(jsonResponse(list));
   } catch (error) {
     console.log(error.stack);
@@ -44,8 +50,8 @@ const postEvent = async (req, res, next) => {
 
     // Slot must be between 8AM to 5PM (Fixed for test purposes)
     if (
-      event.minutes[0] < 480 ||
-      event.minutes[event.minutes.length - 1] > 1020
+      event.minutes[0] < globals.startMinutes ||
+      event.minutes[event.minutes.length - 1] > globals.endMinutes
     ) {
       return next(Boom.badRequest('Please select time between 8AM to 5PM'));
     }
