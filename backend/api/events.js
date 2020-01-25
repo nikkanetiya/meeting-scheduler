@@ -43,12 +43,11 @@ const postEvent = async (req, res, next) => {
       return next(Boom.badRequest(error.message));
     }
     const data = req.body;
-
     const event = createEventPayload(data);
 
     // Must be future time
     if (event.startTime < new Date()) {
-      return next(Boom.badRequest('Time cannot be older than current time'));
+      return next(Boom.badData('Time cannot be older than current time'));
     }
 
     // Slot must be between 8AM to 5PM (Fixed for test purposes)
@@ -56,7 +55,7 @@ const postEvent = async (req, res, next) => {
       event.minutes[0] < globals.startMinutes ||
       event.minutes[event.minutes.length - 1] > globals.endMinutes
     ) {
-      return next(Boom.badRequest('Please select time between 8AM to 5PM'));
+      return next(Boom.badData('Please select time between 8AM to 5PM'));
     }
 
     const result = await addEvent(event);

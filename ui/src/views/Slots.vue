@@ -25,7 +25,6 @@ export default {
   data() {
     return {
       selectedDate: moment(),
-      loading: true,
       selectedSlotIndex: null,
       slots: []
     };
@@ -44,33 +43,28 @@ export default {
       this.getAvailability();
     },
     getAvailability() {
-      this.loading = true;
       this.slots = [];
       const date = this.selectedDate.format("YYYY-MM-DD");
 
       axios.get("http://localhost:3000/events/availability?date=" + date).then(
         response => {
-          this.loading = false;
-
           let { data } = response.data;
           data = data.map(row => {
             row.text = moment(row[0]).format("h:mma");
             return row;
           });
-
           this.slots = data;
         },
         function(error) {
           console.log("error:", error.stack);
-          this.loading = false;
         }
       );
     },
     async addEvent(slot) {
       try {
         const response = await axios.post("http://localhost:3000/events", {
-          startTime: slot.time,
-          duration: slot.duration
+          startTime: slot[0],
+          duration: moment(slot[1]).diff(moment(slot[0]), "minutes")
         });
         if (response && response.status === 200) {
           this.$message.success("Meeting scheduled successfully");
