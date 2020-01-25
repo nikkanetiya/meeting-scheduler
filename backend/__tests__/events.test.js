@@ -2,72 +2,38 @@ const moment = require('moment');
 const request = require('supertest');
 const app = require('../app');
 const db = require('../db/store');
-const slotsData = {
-  start: moment()
-    .add(1, 'hour')
-    .set({ minute: 0, second: 0 })
-    .format(),
-  end: moment()
-    .add(2, 'hour')
-    .set({ minute: 0, second: 0 })
-    .format(),
-  duration: 30
-};
 
 const validEventData = {
   startTime: moment()
-    .add(1, 'hour')
-    .set({ minute: 0, second: 0 })
+    .set({ hour: 13, minute: 0, second: 0 })
     .format(),
   duration: 30
 };
 
 const invalidEventData = {
   startTime: moment()
-    .subtract(1, 'hour')
-    .set({ minute: 0, second: 0 })
+    .set({ hour: 20, minute: 0, second: 0 })
     .format(),
   duration: 30
 };
 
-const potentialInvalidEventSlot = {
-  startTime: moment()
-    .add(10, 'minute')
-    .format(),
-  duration: 30
-};
+let event = {};
 
-beforeAll(() => {
-  db.collection('events')
-    .get()
-    .then(querySnapshot => {
-      querySnapshot.forEach(documentSnapshot => {
-        documentSnapshot.ref.delete().then(() => {});
-      });
-    });
-
-  db.collection('slots')
-    .get()
-    .then(querySnapshot => {
-      querySnapshot.forEach(documentSnapshot => {
-        documentSnapshot.ref.delete().then(() => {});
-      });
-    });
+afterAll(async () => {
+  // Delete the added event
+  const document = db.doc(`events/${event.id}`);
+  await document.delete();
 });
 
 describe('Event Endpoints', () => {
-  it('Should be able to add slots', async () => {
-    const res = await request(app)
-      .post('/events/availability')
-      .send(slotsData);
-    expect(res.statusCode).toEqual(200);
-  });
-
-  it('Should be able to add event within added slot range', async () => {
+  it('Should be able to add event', async () => {
     const res = await request(app)
       .post('/events')
       .send(validEventData);
     expect(res.statusCode).toEqual(200);
+    if (res.statusCode === 200) {
+      event = res.body.data;
+    }
   });
 
   it('Should not add event outside of added slot range', async () => {
@@ -80,7 +46,7 @@ describe('Event Endpoints', () => {
   it('Should return HTTP:422 when slot is not available', async () => {
     const res = await request(app)
       .post('/events')
-      .send(potentialInvalidEventSlot);
+      .send(validEventData);
     expect(res.statusCode).toEqual(422);
   });
 
