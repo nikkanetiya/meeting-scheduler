@@ -29,18 +29,6 @@ curl --location --request POST 'http://localhost:3000/events' \
 curl --location --request GET 'http://localhost:3000/events?from=2020-01-13&to=2020-01-13'
 ```
 
-#### Add Slots
-
-```javascript
-curl --location --request POST 'http://localhost:3000/events/availability' \
---header 'Content-Type: application/json' \
---data-raw '{
-	"start": "2020-01-13T11:30:00+05:30",
-	"end":"2020-01-13T20:59:00+05:30",
-	"duration": 30
-}'
-```
-
 #### List Available Slots
 
 ```javascript
